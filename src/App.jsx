@@ -8,7 +8,6 @@ import Dashboard from './components/Dashboard';
 import VideoGenerator from './components/VideoGenerator';
 import PaymentPage from './components/PaymentPage';
 import NavBar from './components/NavBar';
-// ⭐ IMPORT THE NEW REFERRAL PAGE
 import ReferralPage from './components/ReferralPage'; 
 
 const App = () => {
@@ -43,7 +42,7 @@ const App = () => {
                 {/* Route for Login/Signup */}
                 <Route
                     path="/auth"
-                    element={user ? <Navigate to="/dashboard" replace /> : <AuthForm />}
+                    element={user ? <Navigate to="/generate" replace /> : <AuthForm />}
                 />
                 
                 {/* Protected Routes - PASSING THE USER OBJECT */}
@@ -59,16 +58,15 @@ const App = () => {
                     path="/pay"
                     element={user ? <PaymentPage user={user} /> : <Navigate to="/auth" replace />}
                 />
-                {/* ⭐ NEW REFERRAL ROUTE ADDED */}
                 <Route
                     path="/referral"
                     element={user ? <ReferralPage user={user} /> : <Navigate to="/auth" replace />}
                 />
                 
-                {/* Default Route */}
+                {/* Default Route - MODIFIED TO NAVIGATE TO /generate INSTEAD OF /dashboard */}
                 <Route
                     path="/"
-                    element={<Navigate to={user ? "/dashboard" : "/auth"} replace />}
+                    element={<Navigate to={user ? "/generate" : "/auth"} replace />}
                 />
             </Routes>
         </Router>
