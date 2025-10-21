@@ -501,7 +501,8 @@ const VideoGenerator = ({ user }) => {
                                         rows={4}
                                         value={prompt}
                                         onChange={(e) => setPrompt(e.target.value)}
-                                        placeholder="✨ Describe your video... e.g., 'A dragon soaring over a cyberpunk city at sunset'"
+                                        placeholder="mfano(example)[USER INSTRUCTIONS]: Create a short ad script for our solar lamp product.  
+[USER VOICEOVER]: Taa zetu za jua ni nafuu, zenye kudumu, na rafiki kwa mazingira. Zinaboresha maisha ya familia za Kitanzania."
                                         variant="outlined"
                                         disabled={loading}
                                         required
