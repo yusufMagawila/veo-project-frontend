@@ -1,8 +1,8 @@
 // src/components/NavBar.jsx
-import React, { useState, useEffect } from 'react'; // ⭐ Added useEffect for Firestore listener
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { doc, onSnapshot } from 'firebase/firestore'; // ⭐ Added Firestore imports
-import { db } from '../firebaseConfig'; // ⭐ Import the Firestore DB instance
+import { doc, onSnapshot } from 'firebase/firestore'; 
+import { db } from '../firebaseConfig'; 
 import {
   AppBar,
   Toolbar,
@@ -17,7 +17,7 @@ import {
   Divider,
   useScrollTrigger,
   Slide,
-  Tooltip, // ⭐ Added Tooltip for credits
+  Tooltip,
   CircularProgress
 } from '@mui/material';
 import {
@@ -27,7 +27,8 @@ import {
   VideoSettings,
   CreditCard,
   Menu as MenuIcon,
-  People // ⭐ Added People icon for Referrals
+  People,
+  SupportAgent
 } from '@mui/icons-material';
 
 // Hide AppBar on scroll
@@ -45,22 +46,19 @@ function HideOnScroll(props) {
 const NavBar = ({ user, handleLogout }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [mobileMenuAnchor, setMobileMenuAnchor] = useState(null);
-  const [credits, setCredits] = useState(null); // ⭐ State to hold real-time credits (null initially)
+  const [credits, setCredits] = useState(null); 
   const location = useLocation();
 
-  // ⭐ EFFECT TO FETCH REAL-TIME USER DATA (CREDITS)
+  // EFFECT TO FETCH REAL-TIME USER DATA (CREDITS)
   useEffect(() => {
     if (user) {
       const userRef = doc(db, 'users', user.uid);
       
-      // Set up a real-time listener
       const unsubscribe = onSnapshot(userRef, (docSnap) => {
         if (docSnap.exists()) {
           const userData = docSnap.data();
-          // Set the credit state. This will be 70 for new users!
           setCredits(userData.credits || 0); 
         } else {
-          // If the user doc doesn't exist yet (e.g., just signed up), default to 0
           setCredits(0);
         }
       }, (error) => {
@@ -68,12 +66,11 @@ const NavBar = ({ user, handleLogout }) => {
         setCredits(0);
       });
 
-      // Cleanup function to detach the listener when the component unmounts
       return () => unsubscribe();
     } else {
-      setCredits(null); // Reset when user logs out
+      setCredits(null); 
     }
-  }, [user]); // Re-run effect when the user object changes
+  }, [user]); 
 
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
@@ -87,17 +84,39 @@ const NavBar = ({ user, handleLogout }) => {
     setAnchorEl(null);
     setMobileMenuAnchor(null);
   };
+  
+  // ⭐ PATCHED HANDLER TO OPEN WHATSAPP CHAT WITH NULL CHECK
+  const handleWhatsAppSupport = () => {
+    handleClose(); 
+    
+    // Replace '0695764537' with your actual WhatsApp phone number (with country code, e.g., 18001234567)
+    const phoneNumber = '+255659823172'; 
+    let prefilledMessage = "Hello, I need support for my Veo account.";
+    
+    // ⭐ SAFEGUARD: Check if user and user.email exist before trying to access it
+    if (user && user.email) {
+        prefilledMessage = `Hello, I need support for my Veo account. My user ID is: ${user.email}.`;
+    } else {
+        // Log error if user data is unexpectedly missing
+        console.warn("User data incomplete when attempting to open WhatsApp support.");
+    }
+    
+    const encodedMessage = encodeURIComponent(prefilledMessage);
+    const whatsappLink = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+    
+    // Open the link in a new tab
+    window.open(whatsappLink, '_blank');
+  };
 
   const isActiveRoute = (path) => {
     return location.pathname === path;
   };
 
-  // Navigation items for authenticated users
+  // Navigation items for authenticated users (main desktop/mobile buttons)
   const navItems = [
     { path: '/dashboard', label: 'Dashboard', icon: <Dashboard sx={{ mr: 1 }} /> },
     { path: '/generate', label: 'Generator', icon: <VideoSettings sx={{ mr: 1 }} /> },
     { path: '/pay', label: 'Buy Credits', icon: <CreditCard sx={{ mr: 1 }} /> },
-    // ⭐ ADDED NEW REFERRAL ROUTE
     { path: '/referral', label: 'Referrals', icon: <People sx={{ mr: 1 }} /> }, 
   ];
 
@@ -216,12 +235,17 @@ const NavBar = ({ user, handleLogout }) => {
               </MenuItem>
             ))}
             <Divider />
-            {/* ⭐ Mobile Credit Display */}
+            {/* Mobile Credit Display */}
             <MenuItem sx={{ pointerEvents: 'none' }}>
-                <CreditCard sx={{ mr: 1 }} />
-                <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                    Credits: {credits !== null ? credits : <CircularProgress size={15} sx={{ ml: 1 }} />}
-                </Typography>
+              <CreditCard sx={{ mr: 1 }} />
+              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                Credits: {credits !== null ? credits : <CircularProgress size={15} sx={{ ml: 1 }} />}
+              </Typography>
+            </MenuItem>
+            {/* MOBILE WHATSAPP SUPPORT ITEM */}
+            <MenuItem onClick={handleWhatsAppSupport}>
+                <SupportAgent sx={{ mr: 1 }} />
+                Contact Support (WhatsApp)
             </MenuItem>
             <Divider />
             <MenuItem onClick={handleLogout}>
@@ -254,13 +278,31 @@ const NavBar = ({ user, handleLogout }) => {
               </Button>
             ))}
           </Box>
+          
+          {/* PROMINENT WHATSAPP SUPPORT BUTTON FOR DESKTOP */}
+          <Button
+            onClick={handleWhatsAppSupport}
+            startIcon={<SupportAgent />}
+            variant="outlined" 
+            color="success" 
+            sx={{
+                mx: 1, 
+                textTransform: 'none',
+                fontWeight: 600,
+                borderRadius: 2,
+                px: 2,
+                display: { xs: 'none', md: 'flex' } 
+            }}
+          >
+            Support Chat
+          </Button>
 
           {/* Spacer */}
           <Box sx={{ flexGrow: 1 }} />
 
           {/* User Info & Menu */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            {/* ⭐ DESKTOP CREDIT CHIP DISPLAY */}
+            {/* DESKTOP CREDIT CHIP DISPLAY */}
             <Tooltip title="Your remaining video generation credits">
               <Chip
                 icon={credits !== null ? <CreditCard /> : <CircularProgress size={16} />}
@@ -290,7 +332,7 @@ const NavBar = ({ user, handleLogout }) => {
               />
             </Box>
 
-            {/* Desktop User Menu */}
+            {/* Desktop User Menu Button */}
             <IconButton
               size="large"
               onClick={handleMenu}
@@ -317,7 +359,7 @@ const NavBar = ({ user, handleLogout }) => {
             </Button>
           </Box>
 
-          {/* User Menu Dropdown */}
+          {/* User Menu Dropdown (Cleaned up) */}
           <Menu
             anchorEl={anchorEl}
             open={Boolean(anchorEl)}
