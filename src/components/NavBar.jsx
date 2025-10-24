@@ -60,12 +60,6 @@ const colorScheme = {
   vibrantPrimary: '#9C27B0',
   vibrantSecondary: '#673AB7',
   vibrantGradient: 'linear-gradient(135deg, #9C27B0 0%, #673AB7 100%)',
-  
-  // Background and text colors
-  darkBackground: 'linear-gradient(135deg, #0F0F0F 0%, #1A1A1A 100%)',
-  cardBackground: 'rgba(30, 30, 30, 0.7)',
-  textPrimary: '#FFFFFF',
-  textSecondary: 'rgba(255, 255, 255, 0.7)',
 };
 
 const NavBar = ({ user, handleLogout }) => {
@@ -141,36 +135,56 @@ const NavBar = ({ user, handleLogout }) => {
     { path: '/referral', label: 'Referrals', icon: <People sx={{ mr: 1 }} /> }, 
   ];
 
-  // Glassmorphism style
-  const glassmorphismStyle = {
-    background: `rgba(40, 40, 40, 0.8)`,
-    backdropFilter: 'blur(20px) saturate(180%)',
-    WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-    border: `1px solid rgba(255, 255, 255, 0.1)`,
-    boxShadow: `0 8px 32px rgba(0, 0, 0, 0.3)`,
+  // Clean white background style
+  const whiteBackgroundStyle = {
+    background: '#ffffff',
+    borderBottom: '1px solid #e0e0e0',
+    boxShadow: '0 2px 12px rgba(0, 0, 0, 0.1)',
   };
 
-  // Gradient styles
-  const warmGradientStyle = {
+  // Active tab styles with impressive colors
+  const activeTabStyle = {
+    background: colorScheme.coolGradient,
+    color: 'white',
+    boxShadow: `0 4px 16px ${alpha(colorScheme.coolPrimary, 0.3)}`,
+    transform: 'translateY(-1px)',
+    '&:hover': {
+      background: `linear-gradient(135deg, ${colorScheme.coolSecondary} 0%, ${colorScheme.coolPrimary} 100%)`,
+      transform: 'translateY(-2px)',
+      boxShadow: `0 6px 20px ${alpha(colorScheme.coolPrimary, 0.4)}`,
+    },
+  };
+
+  // Inactive tab style
+  const inactiveTabStyle = {
+    background: 'transparent',
+    color: '#666666',
+    border: '1px solid #e0e0e0',
+    '&:hover': {
+      background: alpha(colorScheme.coolPrimary, 0.08),
+      color: colorScheme.coolPrimary,
+      borderColor: colorScheme.coolPrimary,
+      transform: 'translateY(-1px)',
+    },
+  };
+
+  // Support button style
+  const supportButtonStyle = {
     background: colorScheme.warmGradient,
     color: 'white',
-    transition: 'all 0.3s ease',
     '&:hover': {
       background: `linear-gradient(135deg, ${colorScheme.warmSecondary} 0%, ${colorScheme.warmPrimary} 100%)`,
       transform: 'translateY(-1px)',
-      boxShadow: `0 6px 20px ${alpha(colorScheme.warmPrimary, 0.4)}`,
+      boxShadow: `0 4px 16px ${alpha(colorScheme.warmPrimary, 0.3)}`,
     },
   };
 
-  const coolGradientStyle = {
-    background: colorScheme.coolGradient,
+  // Credits chip style
+  const creditsChipStyle = {
+    background: colorScheme.vibrantGradient,
     color: 'white',
-    transition: 'all 0.3s ease',
-    '&:hover': {
-      background: `linear-gradient(135deg, ${colorScheme.coolSecondary} 0%, ${colorScheme.coolPrimary} 100%)`,
-      transform: 'translateY(-1px)',
-      boxShadow: `0 6px 20px ${alpha(colorScheme.coolPrimary, 0.4)}`,
-    },
+    fontWeight: 700,
+    boxShadow: `0 2px 8px ${alpha(colorScheme.vibrantPrimary, 0.3)}`,
   };
 
   if (!user) {
@@ -179,10 +193,7 @@ const NavBar = ({ user, handleLogout }) => {
         <AppBar 
           position="sticky" 
           elevation={0}
-          sx={{ 
-            ...glassmorphismStyle,
-            color: colorScheme.textPrimary,
-          }}
+          sx={whiteBackgroundStyle}
         >
           <Toolbar>
             {/* Logo/Brand */}
@@ -218,7 +229,7 @@ const NavBar = ({ user, handleLogout }) => {
               to="/auth"
               variant="contained"
               sx={{
-                ...coolGradientStyle,
+                ...supportButtonStyle,
                 borderRadius: 2,
                 px: 3,
                 textTransform: 'none',
@@ -238,10 +249,7 @@ const NavBar = ({ user, handleLogout }) => {
       <AppBar 
         position="sticky" 
         elevation={0}
-        sx={{ 
-          ...glassmorphismStyle,
-          color: colorScheme.textPrimary,
-        }}
+        sx={whiteBackgroundStyle}
       >
         <Toolbar>
           {/* Logo/Brand */}
@@ -265,7 +273,7 @@ const NavBar = ({ user, handleLogout }) => {
             <Box
               component="img"
               src="/kedesh logo.png"
-              alt="kedeshlabs"
+              alt=""
               sx={{ width: 32, height: 32 }}
             />
             KedeSh Labs
@@ -281,7 +289,7 @@ const NavBar = ({ user, handleLogout }) => {
             sx={{ 
               mr: 2, 
               display: { md: 'none' },
-              color: colorScheme.textPrimary
+              color: '#666666'
             }}
           >
             <MenuIcon />
@@ -295,10 +303,12 @@ const NavBar = ({ user, handleLogout }) => {
             sx={{ display: { md: 'none' } }}
             PaperProps={{
               sx: {
-                ...glassmorphismStyle,
+                background: '#ffffff',
                 mt: 1.5,
                 minWidth: 200,
-                borderRadius: 2
+                borderRadius: 2,
+                boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)',
+                border: '1px solid #e0e0e0'
               }
             }}
           >
@@ -308,12 +318,12 @@ const NavBar = ({ user, handleLogout }) => {
                 component={Link}
                 to={item.path}
                 onClick={handleClose}
-                selected={isActiveRoute(item.path)}
                 sx={{
-                  color: colorScheme.textPrimary,
-                  bgcolor: isActiveRoute(item.path) ? alpha(colorScheme.coolPrimary, 0.2) : 'transparent',
+                  color: isActiveRoute(item.path) ? colorScheme.coolPrimary : '#666666',
+                  bgcolor: isActiveRoute(item.path) ? alpha(colorScheme.coolPrimary, 0.1) : 'transparent',
+                  fontWeight: isActiveRoute(item.path) ? 600 : 400,
                   '&:hover': {
-                    bgcolor: alpha(colorScheme.coolPrimary, 0.1),
+                    bgcolor: alpha(colorScheme.coolPrimary, 0.08),
                   }
                 }}
               >
@@ -321,25 +331,25 @@ const NavBar = ({ user, handleLogout }) => {
                 {item.label}
               </MenuItem>
             ))}
-            <Divider sx={{ borderColor: alpha(colorScheme.textSecondary, 0.2) }} />
+            <Divider sx={{ borderColor: '#e0e0e0' }} />
             {/* Mobile Credit Display */}
             <MenuItem sx={{ pointerEvents: 'none', opacity: 0.8 }}>
-              <CreditCard sx={{ mr: 1, color: colorScheme.coolPrimary }} />
-              <Typography variant="body2" sx={{ fontWeight: 600, color: colorScheme.textPrimary }}>
+              <CreditCard sx={{ mr: 1, color: colorScheme.vibrantPrimary }} />
+              <Typography variant="body2" sx={{ fontWeight: 600, color: '#666666' }}>
                 Credits: {credits !== null ? credits : <CircularProgress size={15} sx={{ ml: 1 }} />}
               </Typography>
             </MenuItem>
             {/* MOBILE WHATSAPP SUPPORT ITEM */}
             <MenuItem onClick={handleWhatsAppSupport}>
-                <SupportAgent sx={{ mr: 1, color: colorScheme.coolPrimary }} />
-                <Typography sx={{ color: colorScheme.textPrimary }}>
+                <SupportAgent sx={{ mr: 1, color: colorScheme.warmPrimary }} />
+                <Typography sx={{ color: '#666666' }}>
                   Contact Support
                 </Typography>
             </MenuItem>
-            <Divider sx={{ borderColor: alpha(colorScheme.textSecondary, 0.2) }} />
+            <Divider sx={{ borderColor: '#e0e0e0' }} />
             <MenuItem onClick={handleLogout}>
-              <ExitToApp sx={{ mr: 1, color: colorScheme.warmPrimary }} />
-              <Typography sx={{ color: colorScheme.textPrimary }}>
+              <ExitToApp sx={{ mr: 1, color: '#666666' }} />
+              <Typography sx={{ color: '#666666' }}>
                 Logout
               </Typography>
             </MenuItem>
@@ -358,18 +368,8 @@ const NavBar = ({ user, handleLogout }) => {
                   fontWeight: 600,
                   borderRadius: 2,
                   px: 2,
-                  bgcolor: isActiveRoute(item.path) ? colorScheme.coolGradient : 'transparent',
-                  color: isActiveRoute(item.path) ? 'white' : colorScheme.textPrimary,
-                  border: isActiveRoute(item.path) ? 'none' : `1px solid ${alpha(colorScheme.textSecondary, 0.3)}`,
-                  '&:hover': {
-                    bgcolor: isActiveRoute(item.path) 
-                      ? `linear-gradient(135deg, ${colorScheme.coolSecondary} 0%, ${colorScheme.coolPrimary} 100%)`
-                      : alpha(colorScheme.coolPrimary, 0.1),
-                    transform: 'translateY(-1px)',
-                    boxShadow: isActiveRoute(item.path) 
-                      ? `0 6px 20px ${alpha(colorScheme.coolPrimary, 0.3)}`
-                      : 'none',
-                  }
+                  transition: 'all 0.3s ease',
+                  ...(isActiveRoute(item.path) ? activeTabStyle : inactiveTabStyle)
                 }}
               >
                 {item.label}
@@ -383,7 +383,7 @@ const NavBar = ({ user, handleLogout }) => {
             startIcon={<SupportAgent />}
             variant="contained"
             sx={{
-                ...coolGradientStyle,
+                ...supportButtonStyle,
                 mx: 1, 
                 textTransform: 'none',
                 fontWeight: 600,
@@ -407,14 +407,9 @@ const NavBar = ({ user, handleLogout }) => {
                 label={credits !== null ? `${credits} Credits` : 'Loading...'}
                 variant="filled"
                 sx={{ 
-                    ...warmGradientStyle,
-                    fontWeight: 700, 
+                    ...creditsChipStyle,
                     cursor: 'default',
                     display: { xs: 'none', sm: 'flex' },
-                    '&:hover': {
-                      transform: 'none',
-                      boxShadow: 'none',
-                    }
                 }}
               />
             </Tooltip>
@@ -425,21 +420,22 @@ const NavBar = ({ user, handleLogout }) => {
                 avatar={
                   <Avatar sx={{ 
                     bgcolor: colorScheme.coolGradient,
-                    fontWeight: 600 
+                    fontWeight: 600,
+                    color: 'white'
                   }}>
                     {user.email[0].toUpperCase()}
                   </Avatar>
                 }
                 label={
-                  <Typography variant="body2" sx={{ fontWeight: 500, color: colorScheme.textPrimary }}>
+                  <Typography variant="body2" sx={{ fontWeight: 500, color: '#666666' }}>
                     {user.email.split('@')[0]}
                   </Typography>
                 }
                 variant="outlined"
                 size="small"
                 sx={{
-                  borderColor: alpha(colorScheme.textSecondary, 0.3),
-                  color: colorScheme.textPrimary
+                  borderColor: '#e0e0e0',
+                  color: '#666666'
                 }}
               />
             </Box>
@@ -450,12 +446,12 @@ const NavBar = ({ user, handleLogout }) => {
               onClick={handleMenu}
               sx={{
                 display: { xs: 'none', sm: 'flex' },
-                border: '1px solid',
-                borderColor: alpha(colorScheme.textSecondary, 0.3),
-                color: colorScheme.textPrimary,
+                border: '1px solid #e0e0e0',
+                color: '#666666',
                 '&:hover': {
-                  bgcolor: alpha(colorScheme.coolPrimary, 0.1),
+                  bgcolor: alpha(colorScheme.coolPrimary, 0.08),
                   borderColor: colorScheme.coolPrimary,
+                  color: colorScheme.coolPrimary,
                 }
               }}
             >
@@ -470,9 +466,10 @@ const NavBar = ({ user, handleLogout }) => {
                 display: { xs: 'flex', sm: 'none' },
                 textTransform: 'none',
                 minWidth: 'auto',
-                color: colorScheme.textPrimary,
+                color: '#666666',
                 '&:hover': {
-                  bgcolor: alpha(colorScheme.warmPrimary, 0.1),
+                  bgcolor: alpha(colorScheme.warmPrimary, 0.08),
+                  color: colorScheme.warmPrimary,
                 }
               }}
             >
@@ -487,27 +484,29 @@ const NavBar = ({ user, handleLogout }) => {
             onClose={handleClose}
             PaperProps={{
               sx: {
-                ...glassmorphismStyle,
+                background: '#ffffff',
                 mt: 1.5,
                 minWidth: 200,
-                borderRadius: 2
+                borderRadius: 2,
+                boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)',
+                border: '1px solid #e0e0e0'
               }
             }}
           >
             <MenuItem sx={{ pointerEvents: 'none', opacity: 0.7 }}>
-              <Typography variant="body2" sx={{ color: colorScheme.textSecondary }}>
+              <Typography variant="body2" sx={{ color: '#999999' }}>
                 Signed in as
               </Typography>
             </MenuItem>
             <MenuItem sx={{ pointerEvents: 'none' }}>
-              <Typography variant="body2" sx={{ fontWeight: 600, color: colorScheme.textPrimary }}>
+              <Typography variant="body2" sx={{ fontWeight: 600, color: '#333333' }}>
                 {user.email}
               </Typography>
             </MenuItem>
-            <Divider sx={{ borderColor: alpha(colorScheme.textSecondary, 0.2) }} />
+            <Divider sx={{ borderColor: '#e0e0e0' }} />
             <MenuItem onClick={handleLogout}>
-              <ExitToApp sx={{ mr: 1.5, color: colorScheme.warmPrimary }} />
-              <Typography sx={{ color: colorScheme.textPrimary }}>
+              <ExitToApp sx={{ mr: 1.5, color: '#666666' }} />
+              <Typography sx={{ color: '#666666' }}>
                 Logout
               </Typography>
             </MenuItem>
