@@ -59,7 +59,31 @@ import {
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-// Shuffling GIF Configuration
+// New color scheme based on KedeSh logo
+const colorScheme = {
+    // Warm Red/Orange Gradient
+    warmPrimary: '#FF4757', // Bright red
+    warmSecondary: '#FF7B54', // Soft orange/coral
+    warmGradient: 'linear-gradient(135deg, #FF4757 0%, #FF7B54 100%)',
+    
+    // Cool Green/Teal Gradient
+    coolPrimary: '#00D2A8', // Emerald green
+    coolSecondary: '#009688', // Dark teal
+    coolGradient: 'linear-gradient(135deg, #00D2A8 0%, #009688 100%)',
+    
+    // Vibrant Magenta/Violet Gradient
+    vibrantPrimary: '#9C27B0', // Deep magenta
+    vibrantSecondary: '#673AB7', // Dark violet
+    vibrantGradient: 'linear-gradient(135deg, #9C27B0 0%, #673AB7 100%)',
+    
+    // Background and text colors
+    darkBackground: 'linear-gradient(135deg, #0F0F0F 0%, #1A1A1A 100%)',
+    cardBackground: 'rgba(30, 30, 30, 0.7)',
+    textPrimary: '#FFFFFF',
+    textSecondary: 'rgba(255, 255, 255, 0.7)',
+};
+
+// Updated GIF Configuration with space theme
 const SPACE_GIF_URLS = [
     'https://cdn.pixabay.com/animation/2024/09/24/13/50/13-50-18-262_256.gif', 
     'https://cdn.pixabay.com/animation/2025/02/25/14/44/14-44-04-910_512.gif',
@@ -89,6 +113,7 @@ const ASPECT_RATIO_OPTIONS = [
     { value: '9:16', label: 'Vertical (9:16)', icon: <AspectRatio /> },
 ];
 
+// Updated background options with new color scheme
 const BACKGROUND_OPTIONS = [
     {
         id: 'gif-shuffling-space',
@@ -98,18 +123,32 @@ const BACKGROUND_OPTIONS = [
         thumbnail: '🌠' 
     },
     {
-        id: 'gradient-space',
-        name: 'Cosmic Gradient',
+        id: 'gradient-warm',
+        name: 'Warm Energy',
         type: 'gradient',
-        value: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
-        thumbnail: '🌌'
+        value: colorScheme.warmGradient,
+        thumbnail: '🔥'
+    },
+    {
+        id: 'gradient-cool',
+        name: 'Cool Balance',
+        type: 'gradient',
+        value: colorScheme.coolGradient,
+        thumbnail: '💧'
+    },
+    {
+        id: 'gradient-vibrant',
+        name: 'Vibrant Creative',
+        type: 'gradient',
+        value: colorScheme.vibrantGradient,
+        thumbnail: '🎨'
     },
     {
         id: 'gradient-deep',
-        name: 'Deep Ocean',
+        name: 'Deep Space',
         type: 'gradient',
         value: 'linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%)',
-        thumbnail: '🌊'
+        thumbnail: '🌌'
     },
     {
         id: 'gradient-sunset',
@@ -117,20 +156,6 @@ const BACKGROUND_OPTIONS = [
         type: 'gradient',
         value: 'linear-gradient(135deg, #ff6b6b 0%, #ffa726 50%, #ffecb3 100%)',
         thumbnail: '🌅'
-    },
-    {
-        id: 'gradient-forest',
-        name: 'Mystic Forest',
-        type: 'gradient',
-        value: 'linear-gradient(135deg, #1d976c 0%, #93f9b9 50%, #f7f7f7 100%)',
-        thumbnail: '🌲'
-    },
-    {
-        id: 'gradient-neon',
-        name: 'Neon Dreams',
-        type: 'gradient',
-        value: 'linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%)',
-        thumbnail: '💫'
     },
     {
         id: 'solid-dark',
@@ -252,22 +277,44 @@ const VideoGenerator = ({ user }) => {
     };
 
     const glassmorphismStyle = {
-        background: alpha(theme.palette.background.paper, 0.2), // Increased transparency
+        background: `rgba(40, 40, 40, 0.6)`,
         backdropFilter: 'blur(30px) saturate(200%)',
         WebkitBackdropFilter: 'blur(30px) saturate(200%)',
-        border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
-        boxShadow: `0 4px 24px ${alpha('#000', 0.15)}`,
+        border: `1px solid rgba(255, 255, 255, 0.1)`,
+        boxShadow: `0 8px 32px rgba(0, 0, 0, 0.3)`,
         borderRadius: 4,
     };
 
-    const gradientStyle = {
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
+    const warmGradientStyle = {
+        background: colorScheme.warmGradient,
         color: 'white',
         transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
         '&:hover': {
-            background: 'linear-gradient(135deg, #764ba2 0%, #f093fb 50%, #667eea 100%)',
+            background: `linear-gradient(135deg, ${colorScheme.warmSecondary} 0%, ${colorScheme.warmPrimary} 100%)`,
             transform: 'translateY(-2px)',
-            boxShadow: '0 8px 24px rgba(102, 126, 234, 0.5)',
+            boxShadow: `0 8px 24px ${alpha(colorScheme.warmPrimary, 0.5)}`,
+        },
+    };
+
+    const coolGradientStyle = {
+        background: colorScheme.coolGradient,
+        color: 'white',
+        transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+        '&:hover': {
+            background: `linear-gradient(135deg, ${colorScheme.coolSecondary} 0%, ${colorScheme.coolPrimary} 100%)`,
+            transform: 'translateY(-2px)',
+            boxShadow: `0 8px 24px ${alpha(colorScheme.coolPrimary, 0.5)}`,
+        },
+    };
+
+    const vibrantGradientStyle = {
+        background: colorScheme.vibrantGradient,
+        color: 'white',
+        transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+        '&:hover': {
+            background: `linear-gradient(135deg, ${colorScheme.vibrantSecondary} 0%, ${colorScheme.vibrantPrimary} 100%)`,
+            transform: 'translateY(-2px)',
+            boxShadow: `0 8px 24px ${alpha(colorScheme.vibrantPrimary, 0.5)}`,
         },
     };
 
@@ -296,7 +343,7 @@ const VideoGenerator = ({ user }) => {
                     left: 0,
                     right: 0,
                     bottom: 0,
-                    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Lighter overlay
+                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
                     zIndex: 0,
                     pointerEvents: 'none',
                 }
@@ -312,7 +359,7 @@ const VideoGenerator = ({ user }) => {
                 left: 0,
                 right: 0,
                 bottom: 0,
-                background: 'radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.05) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.05) 0%, transparent 50%)',
+                background: 'radial-gradient(circle at 20% 80%, rgba(255, 71, 87, 0.05) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(0, 210, 168, 0.05) 0%, transparent 50%)',
                 pointerEvents: 'none',
             }
         };
@@ -333,7 +380,7 @@ const VideoGenerator = ({ user }) => {
             <DialogTitle sx={{ 
                 display: 'flex', 
                 alignItems: 'center',
-                background: gradientStyle.background,
+                background: colorScheme.warmGradient,
                 backgroundClip: 'text',
                 WebkitBackgroundClip: 'text',
                 color: 'transparent',
@@ -348,12 +395,12 @@ const VideoGenerator = ({ user }) => {
                             <Card 
                                 sx={{
                                     cursor: 'pointer',
-                                    border: selectedBackground.id === bg.id ? `2px solid ${theme.palette.primary.main}` : '1px solid transparent',
+                                    border: selectedBackground.id === bg.id ? `2px solid ${colorScheme.coolPrimary}` : '1px solid transparent',
                                     transition: 'all 0.4s ease',
                                     transform: selectedBackground.id === bg.id ? 'scale(1.03)' : 'scale(1)',
                                     '&:hover': {
                                         transform: 'scale(1.03)',
-                                        border: `1px solid ${theme.palette.primary.main}`,
+                                        border: `1px solid ${colorScheme.coolPrimary}`,
                                     },
                                     background: alpha(theme.palette.background.paper, 0.1),
                                 }}
@@ -380,7 +427,7 @@ const VideoGenerator = ({ user }) => {
                                     >
                                         {bg.thumbnail}
                                     </Box>
-                                    <Typography variant="caption" fontWeight="600">
+                                    <Typography variant="caption" fontWeight="600" sx={{ color: colorScheme.textPrimary }}>
                                         {bg.name}
                                     </Typography>
                                 </CardContent>
@@ -390,7 +437,7 @@ const VideoGenerator = ({ user }) => {
                 </Grid>
             </DialogContent>
             <DialogActions>
-                <Button onClick={() => setShowBackgroundPicker(false)} sx={{ ...gradientStyle, py: 1 }}>
+                <Button onClick={() => setShowBackgroundPicker(false)} sx={{ ...coolGradientStyle, py: 1 }}>
                     Close
                 </Button>
             </DialogActions>
@@ -406,13 +453,14 @@ const VideoGenerator = ({ user }) => {
             py: 6,
             px: { xs: 2, sm: 3, md: 4 },
             position: 'relative',
+            color: colorScheme.textPrimary,
             '& > *': {
                 position: 'relative',
                 zIndex: 1,
             }
         }}>
             <BackgroundPickerDialog />
-            <Container maxWidth="md"> {/* Narrower container for Flow AI aesthetic */}
+            <Container maxWidth="md">
                 <Grid container spacing={3} justifyContent="center">
                     <Grid item xs={12} md={8}>
                         <Zoom in timeout={1000}>
@@ -429,7 +477,7 @@ const VideoGenerator = ({ user }) => {
                                         left: 0,
                                         right: 0,
                                         height: '3px',
-                                        background: gradientStyle.background,
+                                        background: colorScheme.warmGradient,
                                     }
                                 }}
                             >
@@ -441,9 +489,9 @@ const VideoGenerator = ({ user }) => {
                                         width: 60,
                                         height: 60,
                                         borderRadius: '50%',
-                                        background: gradientStyle.background,
+                                        background: colorScheme.warmGradient,
                                         mb: 2,
-                                        boxShadow: '0 6px 20px rgba(102, 126, 234, 0.4)',
+                                        boxShadow: `0 6px 20px ${alpha(colorScheme.warmPrimary, 0.4)}`,
                                     }}>
                                         <RocketLaunch sx={{ fontSize: 32, color: 'white' }} />
                                     </Box>
@@ -451,19 +499,18 @@ const VideoGenerator = ({ user }) => {
                                         variant="h4" 
                                         sx={{ 
                                             fontWeight: 800,
-                                            background: gradientStyle.background,
+                                            background: colorScheme.warmGradient,
                                             backgroundClip: 'text',
                                             WebkitBackgroundClip: 'text',
                                             color: 'transparent',
                                             fontSize: { xs: '1.8rem', sm: '2.2rem', md: '2.5rem' }
                                         }}
                                     >
-                                        AI Video Generator
+                                        KedeSh AI Generator
                                     </Typography>
                                     <Typography 
                                         variant="body1" 
-                                        color="text.secondary" 
-                                        sx={{ mb: 2, opacity: 0.8 }}
+                                        sx={{ mb: 2, opacity: 0.8, color: colorScheme.textSecondary }}
                                     >
                                         Create stunning videos with AI magic
                                     </Typography>
@@ -472,7 +519,7 @@ const VideoGenerator = ({ user }) => {
                                             icon={<CreditScore sx={{ color: 'white !important' }} />} 
                                             label={`${estimatedCost} Credits`}
                                             sx={{
-                                                ...gradientStyle,
+                                                ...coolGradientStyle,
                                                 fontWeight: 600,
                                                 fontSize: '0.85rem',
                                             }}
@@ -481,10 +528,11 @@ const VideoGenerator = ({ user }) => {
                                             <IconButton 
                                                 onClick={() => setShowBackgroundPicker(true)}
                                                 sx={{
-                                                    background: alpha(theme.palette.background.paper, 0.3),
+                                                    background: alpha(colorScheme.coolPrimary, 0.1),
                                                     backdropFilter: 'blur(8px)',
+                                                    color: colorScheme.coolPrimary,
                                                     '&:hover': {
-                                                        background: alpha(theme.palette.primary.main, 0.2),
+                                                        background: alpha(colorScheme.coolPrimary, 0.2),
                                                     }
                                                 }}
                                             >
@@ -509,7 +557,7 @@ const VideoGenerator = ({ user }) => {
                                         InputProps={{
                                             startAdornment: (
                                                 <InputAdornment position="start">
-                                                    <Psychology color="primary" />
+                                                    <Psychology sx={{ color: colorScheme.coolPrimary }} />
                                                 </InputAdornment>
                                             ),
                                         }}
@@ -520,13 +568,14 @@ const VideoGenerator = ({ user }) => {
                                                 fontSize: '1rem',
                                                 background: alpha(theme.palette.background.paper, 0.2),
                                                 transition: 'all 0.4s ease',
+                                                color: colorScheme.textPrimary,
                                                 '&:hover fieldset': {
-                                                    borderColor: 'primary.main',
-                                                    boxShadow: '0 0 0 3px rgba(102, 126, 234, 0.1)',
+                                                    borderColor: colorScheme.coolPrimary,
+                                                    boxShadow: `0 0 0 3px ${alpha(colorScheme.coolPrimary, 0.1)}`,
                                                 },
                                                 '&.Mui-focused fieldset': {
-                                                    borderColor: 'primary.main',
-                                                    boxShadow: '0 0 0 3px rgba(102, 126, 234, 0.2)',
+                                                    borderColor: colorScheme.coolPrimary,
+                                                    boxShadow: `0 0 0 3px ${alpha(colorScheme.coolPrimary, 0.2)}`,
                                                 },
                                             }
                                         }}
@@ -535,14 +584,18 @@ const VideoGenerator = ({ user }) => {
                                     <Grid container spacing={2} sx={{ mb: 3 }}>
                                         <Grid item xs={12} sm={6}>
                                             <Card sx={{ p: 1.5, ...glassmorphismStyle }}>
-                                                <Typography gutterBottom variant="subtitle2" sx={{ display: 'flex', alignItems: 'center', fontWeight: 600 }}>
-                                                    <AccessTime sx={{ mr: 1, color: 'primary.main' }} /> 
+                                                <Typography gutterBottom variant="subtitle2" sx={{ display: 'flex', alignItems: 'center', fontWeight: 600, color: colorScheme.textPrimary }}>
+                                                    <AccessTime sx={{ mr: 1, color: colorScheme.warmPrimary }} /> 
                                                     Video Length
                                                     <Chip 
                                                         label={`${duration}s`} 
                                                         size="small" 
-                                                        color="primary" 
-                                                        sx={{ ml: 'auto', fontWeight: 600 }} 
+                                                        sx={{ 
+                                                            ml: 'auto', 
+                                                            fontWeight: 600,
+                                                            background: colorScheme.warmGradient,
+                                                            color: 'white'
+                                                        }} 
                                                     />
                                                 </Typography>
                                                 <Slider
@@ -559,9 +612,9 @@ const VideoGenerator = ({ user }) => {
                                                     valueLabelDisplay="auto"
                                                     disabled={loading}
                                                     sx={{
-                                                        color: 'primary.main',
+                                                        color: colorScheme.warmPrimary,
                                                         '& .MuiSlider-markLabel': {
-                                                            color: 'text.secondary',
+                                                            color: colorScheme.textSecondary,
                                                             fontWeight: 500,
                                                         }
                                                     }}
@@ -572,18 +625,24 @@ const VideoGenerator = ({ user }) => {
                                         <Grid item xs={12} sm={6}>
                                             <Card sx={{ p: 1.5, ...glassmorphismStyle }}>
                                                 <FormControl fullWidth disabled={loading}>
-                                                    <InputLabel id="aspect-ratio-label" sx={{ fontWeight: 600 }}>Aspect Ratio</InputLabel>
+                                                    <InputLabel id="aspect-ratio-label" sx={{ fontWeight: 600, color: colorScheme.textPrimary }}>Aspect Ratio</InputLabel>
                                                     <Select
                                                         labelId="aspect-ratio-label"
                                                         value={aspectRatio}
                                                         label="Aspect Ratio"
                                                         onChange={(e) => setAspectRatio(e.target.value)}
-                                                        sx={{ borderRadius: 2 }}
+                                                        sx={{ 
+                                                            borderRadius: 2,
+                                                            color: colorScheme.textPrimary,
+                                                            '& .MuiOutlinedInput-notchedOutline': {
+                                                                borderColor: alpha(colorScheme.textSecondary, 0.3),
+                                                            }
+                                                        }}
                                                     >
                                                         {ASPECT_RATIO_OPTIONS.map(option => (
                                                             <MenuItem key={option.value} value={option.value} sx={{ display: 'flex', alignItems: 'center', py: 1 }}>
                                                                 {option.icon} 
-                                                                <Typography variant="body2" sx={{ ml: 1.5, fontWeight: 500 }}>
+                                                                <Typography variant="body2" sx={{ ml: 1.5, fontWeight: 500, color: colorScheme.textPrimary }}>
                                                                     {option.label}
                                                                 </Typography>
                                                             </MenuItem>
@@ -605,20 +664,20 @@ const VideoGenerator = ({ user }) => {
                                                             checkedIcon={<Mic />}
                                                             sx={{
                                                                 '& .MuiSwitch-switchBase.Mui-checked': {
-                                                                    color: theme.palette.primary.main,
+                                                                    color: colorScheme.coolPrimary,
                                                                 },
                                                                 '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-                                                                    backgroundColor: theme.palette.primary.main,
+                                                                    backgroundColor: colorScheme.coolPrimary,
                                                                 },
                                                             }}
                                                         />
                                                     }
                                                     label={
                                                         <Box>
-                                                            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                                            <Typography variant="body2" sx={{ fontWeight: 600, color: colorScheme.textPrimary }}>
                                                                 {withAudio ? 'With Audio' : 'Without Audio'}
                                                             </Typography>
-                                                            <Typography variant="caption" color="text.secondary">
+                                                            <Typography variant="caption" sx={{ color: colorScheme.textSecondary }}>
                                                                 {withAudio ? '23 credits/sec' : '15 credits/sec'}
                                                             </Typography>
                                                         </Box>
@@ -647,10 +706,10 @@ const VideoGenerator = ({ user }) => {
                                             fontSize: '1rem',
                                             fontWeight: 600,
                                             textTransform: 'none',
-                                            ...gradientStyle,
+                                            ...warmGradientStyle,
                                             ...(loading && pulsingAnimation),
                                             '&.Mui-disabled': {
-                                                background: 'linear-gradient(135deg, #ccc 0%, #999 100%)',
+                                                background: 'linear-gradient(135deg, #666 0%, #999 100%)',
                                                 color: 'white',
                                                 transform: 'none',
                                                 boxShadow: 'none',
@@ -669,7 +728,7 @@ const VideoGenerator = ({ user }) => {
                                                 icon={<WarningAmber />}
                                                 sx={{
                                                     ...glassmorphismStyle,
-                                                    '& .MuiAlert-message': { fontWeight: 500 }
+                                                    '& .MuiAlert-message': { fontWeight: 500, color: colorScheme.textPrimary }
                                                 }}
                                                 action={
                                                     error.includes('credit') && (
@@ -677,7 +736,7 @@ const VideoGenerator = ({ user }) => {
                                                             color="inherit" 
                                                             size="small" 
                                                             onClick={() => navigate('/pay')}
-                                                            sx={{ ...gradientStyle, py: 0.5 }}
+                                                            sx={{ ...coolGradientStyle, py: 0.5 }}
                                                         >
                                                             Buy Credits
                                                         </Button>
@@ -692,7 +751,7 @@ const VideoGenerator = ({ user }) => {
                                                 icon={status.includes('Error') ? <WarningAmber /> : <CheckCircle />}
                                                 sx={{
                                                     ...glassmorphismStyle,
-                                                    '& .MuiAlert-message': { fontWeight: 500 }
+                                                    '& .MuiAlert-message': { fontWeight: 500, color: colorScheme.textPrimary }
                                                 }}
                                             >
                                                 {status}
@@ -719,7 +778,7 @@ const VideoGenerator = ({ user }) => {
                                         fontWeight: 700, 
                                         display: 'flex', 
                                         alignItems: 'center',
-                                        background: gradientStyle.background,
+                                        background: colorScheme.coolGradient,
                                         backgroundClip: 'text',
                                         WebkitBackgroundClip: 'text',
                                         color: 'transparent',
@@ -734,7 +793,7 @@ const VideoGenerator = ({ user }) => {
                                     sx={{ 
                                         mt: 2,
                                         '& .MuiStepConnector-line': {
-                                            borderColor: alpha(theme.palette.divider, 0.2),
+                                            borderColor: alpha(colorScheme.textSecondary, 0.2),
                                         },
                                     }}
                                 >
@@ -747,14 +806,14 @@ const VideoGenerator = ({ user }) => {
                                                             width: 28,
                                                             height: 28,
                                                             borderRadius: '50%',
-                                                            bgcolor: index <= getActiveStep() ? gradientStyle.background : alpha(theme.palette.divider, 0.2),
+                                                            bgcolor: index <= getActiveStep() ? colorScheme.warmGradient : alpha(colorScheme.textSecondary, 0.2),
                                                             display: 'flex',
                                                             alignItems: 'center',
                                                             justifyContent: 'center',
                                                             color: 'white',
                                                             fontSize: '0.8rem',
                                                             fontWeight: 600,
-                                                            boxShadow: index <= getActiveStep() ? '0 4px 12px rgba(102, 126, 234, 0.3)' : 'none',
+                                                            boxShadow: index <= getActiveStep() ? `0 4px 12px ${alpha(colorScheme.warmPrimary, 0.3)}` : 'none',
                                                             ...(index === getActiveStep() && pulsingAnimation),
                                                         }}
                                                     >
@@ -764,7 +823,7 @@ const VideoGenerator = ({ user }) => {
                                             >
                                                 <Typography 
                                                     sx={{ 
-                                                        color: index <= getActiveStep() ? 'text.primary' : 'text.secondary',
+                                                        color: index <= getActiveStep() ? colorScheme.textPrimary : colorScheme.textSecondary,
                                                         fontWeight: index <= getActiveStep() ? 600 : 500,
                                                         fontSize: '0.9rem'
                                                     }}
@@ -792,7 +851,7 @@ const VideoGenerator = ({ user }) => {
                                             fontWeight: 700,
                                             display: 'flex',
                                             alignItems: 'center',
-                                            background: gradientStyle.background,
+                                            background: colorScheme.vibrantGradient,
                                             backgroundClip: 'text',
                                             WebkitBackgroundClip: 'text',
                                             color: 'transparent',
@@ -801,7 +860,7 @@ const VideoGenerator = ({ user }) => {
                                         <Lightbulb sx={{ mr: 1 }} />
                                         Pro Tips
                                     </Typography>
-                                    <Divider sx={{ my: 2, borderColor: alpha(theme.palette.divider, 0.2) }} />
+                                    <Divider sx={{ my: 2, borderColor: alpha(colorScheme.textSecondary, 0.2) }} />
                                     <Box 
                                         component="ul" 
                                         sx={{ 
@@ -820,10 +879,10 @@ const VideoGenerator = ({ user }) => {
                                                 key={index}
                                                 component="li" 
                                                 variant="caption" 
-                                                color="text.secondary"
                                                 sx={{
                                                     fontWeight: 500,
                                                     lineHeight: 1.5,
+                                                    color: colorScheme.textSecondary,
                                                 }}
                                             >
                                                 {tip}

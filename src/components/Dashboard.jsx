@@ -70,7 +70,6 @@ const DialogVideoPlayer = ({ url, isReady }) => {
     );
 };
 
-
 const Dashboard = ({ user }) => {
   const [credits, setCredits] = useState(null);
   const [history, setHistory] = useState([]);
@@ -80,6 +79,30 @@ const Dashboard = ({ user }) => {
   const [videoDialogOpen, setVideoDialogOpen] = useState(false);
   const [isDialogPlayerReady, setIsDialogPlayerReady] = useState(false); 
   const theme = useTheme();
+
+  // New color scheme based on the KedeSh logo description
+  const colorScheme = {
+    // Warm Red/Orange Gradient
+    warmPrimary: '#FF4757', // Bright red
+    warmSecondary: '#FF7B54', // Soft orange/coral
+    warmGradient: 'linear-gradient(135deg, #FF4757 0%, #FF7B54 100%)',
+    
+    // Cool Green/Teal Gradient
+    coolPrimary: '#00D2A8', // Emerald green
+    coolSecondary: '#009688', // Dark teal
+    coolGradient: 'linear-gradient(135deg, #00D2A8 0%, #009688 100%)',
+    
+    // Vibrant Magenta/Violet Gradient
+    vibrantPrimary: '#9C27B0', // Deep magenta
+    vibrantSecondary: '#673AB7', // Dark violet
+    vibrantGradient: 'linear-gradient(135deg, #9C27B0 0%, #673AB7 100%)',
+    
+    // Background and text colors
+    darkBackground: 'linear-gradient(135deg, #0F0F0F 0%, #1A1A1A 100%)',
+    cardBackground: 'rgba(30, 30, 30, 0.7)',
+    textPrimary: '#FFFFFF',
+    textSecondary: 'rgba(255, 255, 255, 0.7)',
+  };
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -196,28 +219,28 @@ const handleDeleteVideo = async (videoId, e) => {
   const getStatusIcon = (status) => {
     switch (status?.toLowerCase()) {
       case 'completed':
-        return <CheckCircle color="success" />;
+        return <CheckCircle sx={{ color: colorScheme.coolPrimary }} />;
       case 'processing':
       case 'generating':
       case 'in_progress':
       case 'in_queue':
-        return <CircularProgress size={20} />;
+        return <CircularProgress size={20} sx={{ color: colorScheme.warmPrimary }} />;
       case 'pending':
-        return <Schedule color="warning" />;
+        return <Schedule sx={{ color: colorScheme.warmSecondary }} />;
       case 'failed':
       case 'expired':
-        return <ErrorOutline color="error" />;
+        return <ErrorOutline sx={{ color: colorScheme.warmPrimary }} />;
       default:
-        return <PlayArrow color="primary" />;
+        return <PlayArrow sx={{ color: colorScheme.coolPrimary }} />;
     }
   };
 
   const statusGradients = {
-    completed: 'linear-gradient(45deg, #4caf50, #8bc34a)',
-    processing: 'linear-gradient(45deg, #667eea, #764ba2)',
-    pending: 'linear-gradient(45deg, #ffa726, #ff6b6b)',
-    failed: 'linear-gradient(45deg, #d32f2f, #b71c1c)',
-    default: 'linear-gradient(45deg, #667eea, #764ba2)',
+    completed: colorScheme.coolGradient,
+    processing: colorScheme.warmGradient,
+    pending: `linear-gradient(45deg, ${colorScheme.warmSecondary}, #FFA726)`,
+    failed: `linear-gradient(45deg, ${colorScheme.warmPrimary}, #D32F2F)`,
+    default: colorScheme.vibrantGradient,
   };
 
   const getStatusColor = (status) => {
@@ -240,25 +263,53 @@ const handleDeleteVideo = async (videoId, e) => {
   };
 
   const glassmorphismStyle = {
-    background: alpha(theme.palette.background.paper, 0.3),
+    background: `rgba(40, 40, 40, 0.6)`,
     backdropFilter: 'blur(30px)',
     WebkitBackdropFilter: 'blur(30px)',
-    border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
-    boxShadow: `0 4px 24px ${alpha('#000', 0.15)}`,
+    border: `1px solid rgba(255, 255, 255, 0.1)`,
+    boxShadow: `0 8px 32px rgba(0, 0, 0, 0.3)`,
     borderRadius: 3,
   };
 
   const gradientCardStyle = {
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    background: colorScheme.warmGradient,
     color: 'white',
     borderRadius: 3,
     position: 'relative',
     overflow: 'hidden',
     transition: 'all 0.4s ease',
     '&:hover': {
-      background: 'linear-gradient(135deg, #764ba2 0%, #667eea 100%)',
+      background: `linear-gradient(135deg, ${colorScheme.warmSecondary} 0%, ${colorScheme.warmPrimary} 100%)`,
       transform: 'translateY(-2px)',
-      boxShadow: '0 8px 24px rgba(102, 126, 234, 0.5)',
+      boxShadow: `0 12px 28px ${alpha(colorScheme.warmPrimary, 0.4)}`,
+    },
+  };
+
+  const coolGradientCardStyle = {
+    background: colorScheme.coolGradient,
+    color: 'white',
+    borderRadius: 3,
+    position: 'relative',
+    overflow: 'hidden',
+    transition: 'all 0.4s ease',
+    '&:hover': {
+      background: `linear-gradient(135deg, ${colorScheme.coolSecondary} 0%, ${colorScheme.coolPrimary} 100%)`,
+      transform: 'translateY(-2px)',
+      boxShadow: `0 12px 28px ${alpha(colorScheme.coolPrimary, 0.4)}`,
+    },
+  };
+
+  const vibrantGradientCardStyle = {
+    background: colorScheme.vibrantGradient,
+    color: 'white',
+    borderRadius: 3,
+    position: 'relative',
+    overflow: 'hidden',
+    transition: 'all 0.4s ease',
+    '&:hover': {
+      background: `linear-gradient(135deg, ${colorScheme.vibrantSecondary} 0%, ${colorScheme.vibrantPrimary} 100%)`,
+      transform: 'translateY(-2px)',
+      boxShadow: `0 12px 28px ${alpha(colorScheme.vibrantPrimary, 0.4)}`,
     },
   };
 
@@ -274,7 +325,8 @@ const handleDeleteVideo = async (videoId, e) => {
     flexDirection: 'column',
     '&:hover': {
       transform: 'translateY(-4px)',
-      boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
+      boxShadow: `0 12px 32px rgba(0,0,0,0.4)`,
+      border: `1px solid ${alpha(colorScheme.coolPrimary, 0.3)}`,
     },
   };
 
@@ -295,7 +347,7 @@ const handleDeleteVideo = async (videoId, e) => {
         alignItems: 'center',
         minHeight: '100vh',
         width: '100vw',
-        background: 'linear-gradient(135deg, #0c0c0c 0%, #1a1a1a 100%)',
+        background: colorScheme.darkBackground,
         position: 'fixed',
         top: 0,
         left: 0,
@@ -306,7 +358,7 @@ const handleDeleteVideo = async (videoId, e) => {
               width: 60,
               height: 60,
               borderRadius: '50%',
-              background: gradientCardStyle.background,
+              background: colorScheme.warmGradient,
               animation: 'spin 1.5s linear infinite',
               '@keyframes spin': {
                 '0%': { transform: 'rotate(0deg)' },
@@ -328,7 +380,7 @@ const handleDeleteVideo = async (videoId, e) => {
       <Box sx={{
         width: '100vw',
         minHeight: '100vh',
-        background: 'linear-gradient(135deg, #0c0c0c 0%, #1a1a1a 100%)',
+        background: colorScheme.darkBackground,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -339,6 +391,7 @@ const handleDeleteVideo = async (videoId, e) => {
             borderRadius: 3,
             ...glassmorphismStyle,
             maxWidth: '400px',
+            color: colorScheme.textPrimary,
           }}
         >
           {error}
@@ -351,9 +404,10 @@ const handleDeleteVideo = async (videoId, e) => {
     <Box sx={{
       width: '100vw',
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #0c0c0c 0%, #1a1a1a 100%)',
+      background: colorScheme.darkBackground,
       py: 6,
       px: { xs: 2, sm: 3, md: 4 },
+      color: colorScheme.textPrimary,
     }}>
       <Box sx={{ mb: 4, textAlign: 'center' }}>
         <Typography
@@ -362,19 +416,21 @@ const handleDeleteVideo = async (videoId, e) => {
           gutterBottom
           sx={{
             fontWeight: 700,
-            background: gradientCardStyle.background,
+            background: colorScheme.warmGradient,
             backgroundClip: 'text',
             WebkitBackgroundClip: 'text',
             color: 'transparent',
             fontSize: { xs: '2rem', sm: '2.5rem' },
           }}
         >
-          AI Video Studio
+          KedeSh AI Studio
         </Typography>
         <Typography
           variant="body1"
-          color="text.secondary"
-          sx={{ opacity: 0.8 }}
+          sx={{ 
+            opacity: 0.8,
+            color: colorScheme.textSecondary 
+          }}
         >
           Your creative hub for AI-generated videos
         </Typography>
@@ -407,7 +463,7 @@ const handleDeleteVideo = async (videoId, e) => {
           <Card
             elevation={0}
             sx={{
-              ...glassmorphismStyle,
+              ...coolGradientCardStyle,
               height: '120px',
             }}
           >
@@ -417,14 +473,11 @@ const handleDeleteVideo = async (videoId, e) => {
                   sx={{
                     fontSize: 36,
                     mr: 1.5,
-                    background: statusGradients.default,
-                    backgroundClip: 'text',
-                    WebkitBackgroundClip: 'text',
-                    color: 'transparent',
+                    opacity: 0.9,
                   }}
                 />
                 <Box>
-                  <Typography color="text.secondary" variant="body2">
+                  <Typography variant="body2" sx={{ opacity: 0.9 }}>
                     Total Videos
                   </Typography>
                   <Typography variant="h4" sx={{ fontWeight: 700 }}>
@@ -439,7 +492,7 @@ const handleDeleteVideo = async (videoId, e) => {
           <Card
             elevation={0}
             sx={{
-              ...glassmorphismStyle,
+              ...vibrantGradientCardStyle,
               height: '120px',
             }}
           >
@@ -449,14 +502,11 @@ const handleDeleteVideo = async (videoId, e) => {
                   sx={{
                     fontSize: 36,
                     mr: 1.5,
-                    background: statusGradients.completed,
-                    backgroundClip: 'text',
-                    WebkitBackgroundClip: 'text',
-                    color: 'transparent',
+                    opacity: 0.9,
                   }}
                 />
                 <Box>
-                  <Typography color="text.secondary" variant="body2">
+                  <Typography variant="body2" sx={{ opacity: 0.9 }}>
                     Completed
                   </Typography>
                   <Typography variant="h4" sx={{ fontWeight: 700 }}>
@@ -481,7 +531,7 @@ const handleDeleteVideo = async (videoId, e) => {
               <VideoLibrary
                 sx={{
                   mr: 1.5,
-                  background: statusGradients.default,
+                  background: colorScheme.coolGradient,
                   backgroundClip: 'text',
                   WebkitBackgroundClip: 'text',
                   color: 'transparent',
@@ -495,8 +545,11 @@ const handleDeleteVideo = async (videoId, e) => {
             <Chip
               label="Sorted by: Newest First"
               size="small"
-              color="primary"
-              variant="outlined"
+              sx={{
+                background: colorScheme.coolGradient,
+                color: 'white',
+                fontWeight: 600,
+              }}
             />
           </Box>
           {history.length === 0 ? (
@@ -504,30 +557,30 @@ const handleDeleteVideo = async (videoId, e) => {
               <VideoLibrary
                 sx={{
                   fontSize: 48,
-                  color: 'text.secondary',
+                  color: colorScheme.textSecondary,
                   mb: 2,
                   opacity: 0.6,
                 }}
               />
-              <Typography variant="h6" color="text.secondary" gutterBottom>
+              <Typography variant="h6" sx={{ color: colorScheme.textSecondary }} gutterBottom>
                 No videos generated yet
               </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2, opacity: 0.7 }}>
+              <Typography variant="body2" sx={{ color: colorScheme.textSecondary, mb: 2, opacity: 0.7 }}>
                 Start creating amazing videos with AI!
               </Typography>
               <Button
                 variant="contained"
                 size="large"
                 sx={{
-                  background: gradientCardStyle.background,
+                  background: colorScheme.warmGradient,
                   borderRadius: 2,
                   px: 3,
                   py: 1,
                   fontWeight: 600,
                   '&:hover': {
                     transform: 'translateY(-2px)',
-                    boxShadow: '0 6px 16px rgba(102, 126, 234, 0.4)',
-                    background: gradientCardStyle['&:hover'].background,
+                    boxShadow: `0 8px 24px ${alpha(colorScheme.warmPrimary, 0.4)}`,
+                    background: `linear-gradient(135deg, ${colorScheme.warmSecondary} 0%, ${colorScheme.warmPrimary} 100%)`,
                   },
                   transition: 'all 0.3s ease',
                 }}
@@ -571,9 +624,9 @@ const handleDeleteVideo = async (videoId, e) => {
                             Your browser does not support the video tag.
                         </video>
                       ) : (
-                        <Box sx={{ textAlign: 'center', color: 'text.secondary' }}>
+                        <Box sx={{ textAlign: 'center', color: colorScheme.textSecondary }}>
                           {getStatusIcon(video.status)}
-                          <Typography variant="caption" sx={{ mt: 1 }}>
+                          <Typography variant="caption" sx={{ mt: 1, color: colorScheme.textSecondary }}>
                             {video.status}
                           </Typography>
                         </Box>
@@ -596,7 +649,7 @@ const handleDeleteVideo = async (videoId, e) => {
                               cursor: 'pointer',
                               transition: 'all 0.3s ease',
                               '&:hover': {
-                                background: 'rgba(102, 126, 234, 0.7)',
+                                background: alpha(colorScheme.coolPrimary, 0.7),
                                 transform: 'translate(-50%, -50%) scale(1.1)',
                               },
                             }}
@@ -646,6 +699,7 @@ const handleDeleteVideo = async (videoId, e) => {
                           WebkitLineClamp: 2,
                           WebkitBoxOrient: 'vertical',
                           lineHeight: 1.2,
+                          color: colorScheme.textPrimary,
                         }}
                       >
                         {video.prompt}
@@ -659,7 +713,7 @@ const handleDeleteVideo = async (videoId, e) => {
                             height: 3,
                             borderRadius: 2,
                             mb: 1,
-                            background: alpha(theme.palette.primary.main, 0.1),
+                            background: alpha(colorScheme.warmPrimary, 0.1),
                             '& .MuiLinearProgress-bar': {
                               background: statusGradients.processing,
                               borderRadius: 2,
@@ -678,11 +732,11 @@ const handleDeleteVideo = async (videoId, e) => {
                                   openVideoDialog(video);
                                 }}
                                 sx={{
-                                  background: gradientCardStyle.background,
+                                  background: colorScheme.coolGradient,
                                   color: 'white',
                                   '&:hover': {
                                     transform: 'scale(1.1)',
-                                    boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)',
+                                    boxShadow: `0 4px 12px ${alpha(colorScheme.coolPrimary, 0.3)}`,
                                   },
                                 }}
                               >
@@ -692,10 +746,10 @@ const handleDeleteVideo = async (videoId, e) => {
                                 size="small"
                                 onClick={(e) => handleDownload(video.url, `video-${video.id}.mp4`, e)}
                                 sx={{
-                                  background: alpha(theme.palette.primary.main, 0.1),
-                                  color: 'primary.main',
+                                  background: alpha(colorScheme.coolPrimary, 0.1),
+                                  color: colorScheme.coolPrimary,
                                   '&:hover': {
-                                    background: alpha(theme.palette.primary.main, 0.2),
+                                    background: alpha(colorScheme.coolPrimary, 0.2),
                                     transform: 'scale(1.1)',
                                   },
                                 }}
@@ -708,10 +762,10 @@ const handleDeleteVideo = async (videoId, e) => {
                             size="small"
                             onClick={(e) => handleDeleteVideo(video.id, e)}
                             sx={{
-                              background: alpha(theme.palette.error.main, 0.1),
-                              color: 'error.main',
+                              background: alpha(colorScheme.warmPrimary, 0.1),
+                              color: colorScheme.warmPrimary,
                               '&:hover': {
-                                background: alpha(theme.palette.error.main, 0.2),
+                                background: alpha(colorScheme.warmPrimary, 0.2),
                                 transform: 'scale(1.1)',
                               },
                             }}
@@ -722,11 +776,11 @@ const handleDeleteVideo = async (videoId, e) => {
                         {video.timestamp && (
                           <Typography
                             variant="caption"
-                            color="text.secondary"
                             sx={{
                               display: 'block',
                               opacity: 0.7,
                               fontSize: '0.65rem',
+                              color: colorScheme.textSecondary,
                             }}
                           >
                             {new Date(video.timestamp.toDate ? video.timestamp.toDate() : video.timestamp).toLocaleDateString('en-US', {
@@ -758,7 +812,7 @@ const handleDeleteVideo = async (videoId, e) => {
         }}
         sx={{
           '& .MuiDialog-paper': {
-            background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
+            background: colorScheme.darkBackground,
             borderRadius: 3,
             ...glassmorphismStyle,
             animation: 'fadeIn 0.4s ease-in-out',
@@ -775,14 +829,15 @@ const handleDeleteVideo = async (videoId, e) => {
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+            borderBottom: `1px solid ${alpha('#fff', 0.1)}`,
             pb: 1.5,
+            color: colorScheme.textPrimary,
           }}
         >
           <Typography variant="h6" sx={{ fontWeight: 600 }}>
             {selectedVideo?.prompt}
           </Typography>
-          <IconButton onClick={closeVideoDialog} sx={{ color: 'white' }}>
+          <IconButton onClick={closeVideoDialog} sx={{ color: colorScheme.textPrimary }}>
             <Close />
           </IconButton>
         </DialogTitle>
@@ -803,12 +858,12 @@ const handleDeleteVideo = async (videoId, e) => {
             onClick={(e) => handleDownload(selectedVideo?.url, `video-${selectedVideo?.id}.mp4`, e)}
             startIcon={<Download />}
             sx={{
-              background: gradientCardStyle.background,
+              background: colorScheme.coolGradient,
               color: 'white',
               borderRadius: 2,
               px: 2,
               '&:hover': {
-                background: gradientCardStyle['&:hover'].background,
+                background: `linear-gradient(135deg, ${colorScheme.coolSecondary} 0%, ${colorScheme.coolPrimary} 100%)`,
                 transform: 'translateY(-1px)',
               },
             }}
@@ -819,12 +874,12 @@ const handleDeleteVideo = async (videoId, e) => {
             onClick={(e) => handleDeleteVideo(selectedVideo?.id, e)}
             startIcon={<Delete />}
             sx={{
-              background: alpha(theme.palette.error.main, 0.1),
-              color: 'error.main',
+              background: alpha(colorScheme.warmPrimary, 0.1),
+              color: colorScheme.warmPrimary,
               borderRadius: 2,
               px: 2,
               '&:hover': {
-                background: alpha(theme.palette.error.main, 0.2),
+                background: alpha(colorScheme.warmPrimary, 0.2),
                 transform: 'translateY(-1px)',
               },
             }}
