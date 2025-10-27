@@ -38,8 +38,8 @@ const createUserRecord = async (userAuth, referrerUid) => {
     await setDoc(userRef, {
         uid: userAuth.uid,
         email: userAuth.email,
-        // ⭐ IMPLEMENTING 70 FREE CREDITS
-        credits: 70, 
+        // ⭐ IMPLEMENTING 100 FREE CREDITS
+        credits: 100, 
         // ⭐ IMPLEMENTING REFERRAL TRACKING
         referred_by_uid: referrerUid || null,
         commission_balance: 0.0, // For the referrer's earnings
@@ -260,9 +260,9 @@ const AuthForm = () => {
                         </Typography>
                         <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, mt: 2 }}>
                             <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center' }}>
-                                {/* ⭐ UPDATED to 70 Credits */}
+                                {/* ⭐ UPDATED to 100 Credits */}
                                 <AutoAwesome sx={{ fontSize: 16, mr: 1, color: 'success.main' }} />
-                                **70 Free Credits**
+                                **100 Free Credits**
                             </Typography>
                             <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center' }}>
                                 <AutoAwesome sx={{ fontSize: 16, mr: 1, color: 'primary.main' }} />
