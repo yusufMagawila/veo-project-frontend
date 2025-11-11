@@ -38,6 +38,108 @@ import {
 // Using VITE_API_URL if available, otherwise defaulting to '/api'.
 const API_URL = import.meta.env.VITE_API_URL || '/api'; 
 
+// 🆕 Video Loading Skeleton Component with Progress
+const VideoLoadingSkeleton = ({ status, progress }) => {
+  const theme = useTheme();
+  
+  return (
+    <Box sx={{ 
+      width: '100%', 
+      height: '100%', 
+      display: 'flex', 
+      flexDirection: 'column',
+      alignItems: 'center', 
+      justifyContent: 'center',
+      background: 'linear-gradient(45deg, #2d2d2d, #3d3d3d)',
+      padding: 2,
+      color: 'white'
+    }}>
+      <CircularProgress 
+        size={40} 
+        thickness={4}
+        sx={{ 
+          color: theme.palette.primary.main,
+          mb: 2 
+        }} 
+      />
+      <Typography variant="body2" sx={{ mb: 1, fontWeight: 600 }}>
+        {status === 'generating' ? 'Generating Video' : 
+         status === 'processing' ? 'Processing' :
+         status === 'in_progress' ? 'In Progress' :
+         status === 'in_queue' ? 'In Queue' : 'Loading'}
+      </Typography>
+      
+      {/* Progress bar with percentage */}
+      <Box sx={{ width: '80%', mb: 1 }}>
+        <LinearProgress 
+          variant="determinate" 
+          value={progress || 0}
+          sx={{
+            height: 6,
+            borderRadius: 3,
+            backgroundColor: 'rgba(255,255,255,0.1)',
+            '& .MuiLinearProgress-bar': {
+              background: 'linear-gradient(135deg, #FF4757 0%, #FF7B54 100%)',
+              borderRadius: 3,
+            }
+          }}
+        />
+      </Box>
+      
+      <Typography variant="caption" sx={{ opacity: 0.8 }}>
+        {progress || 0}% Complete
+      </Typography>
+    </Box>
+  );
+};
+
+// 🆕 Collapsible Prompt Component
+const CollapsiblePrompt = ({ prompt, maxLines = 2 }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const theme = useTheme();
+  
+  return (
+    <Box>
+      <Typography
+        variant="body2"
+        sx={{
+          fontWeight: 600,
+          mb: 1,
+          height: isExpanded ? 'auto' : '36px',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          display: '-webkit-box',
+          WebkitLineClamp: isExpanded ? 'none' : maxLines,
+          WebkitBoxOrient: 'vertical',
+          lineHeight: 1.2,
+          color: theme.palette.text.primary,
+          cursor: 'pointer',
+          transition: 'all 0.3s ease',
+        }}
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
+        {prompt}
+      </Typography>
+      
+      {/* Show expand/collapse hint on mobile for long prompts */}
+      {prompt && prompt.length > 80 && (
+        <Typography 
+          variant="caption" 
+          sx={{ 
+            color: theme.palette.primary.main,
+            cursor: 'pointer',
+            fontWeight: 600,
+            display: { xs: 'block', md: 'none' }
+          }}
+          onClick={() => setIsExpanded(!isExpanded)}
+        >
+          {isExpanded ? 'Show less' : 'Show more'}
+        </Typography>
+      )}
+    </Box>
+  );
+};
+
 // 🆕 Native HTML5 Video Player Component for the Dialog
 const DialogVideoPlayer = ({ url, isReady }) => {
     const videoRef = useRef(null);
@@ -80,6 +182,10 @@ const Dashboard = ({ user }) => {
   const [isDialogPlayerReady, setIsDialogPlayerReady] = useState(false); 
   const theme = useTheme();
 
+  // 🆕 Polling state
+  const [pollingInterval, setPollingInterval] = useState(null);
+  const [lastUpdate, setLastUpdate] = useState(Date.now());
+
   // New color scheme based on the KedeSh logo description
   const colorScheme = {
     // Warm Red/Orange Gradient
@@ -102,6 +208,99 @@ const Dashboard = ({ user }) => {
     cardBackground: 'rgba(30, 30, 30, 0.7)',
     textPrimary: '#FFFFFF',
     textSecondary: 'rgba(255, 255, 255, 0.7)',
+  };
+
+  // 🆕 Function to check for video updates
+  const checkForVideoUpdates = async () => {
+    if (!user) return;
+
+    try {
+      const token = await user.getIdToken();
+      const response = await axios.get(`${API_URL}/api/user/dashboard`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      const rawHistory = response.data.history || [];
+      const sortedHistory = rawHistory.sort((a, b) => {
+        const getTime = (item) => {
+          if (!item || !item.timestamp) return 0;
+          if (item.timestamp.toDate) {
+            return item.timestamp.toDate().getTime();
+          }
+          return new Date(item.timestamp).getTime();
+        };
+        return getTime(b) - getTime(a);
+      });
+
+      // Check if there are any changes in video status or new videos
+      const currentVideoIds = history.map(video => video.id);
+      const newVideoIds = sortedHistory.map(video => video.id);
+      
+      // If videos changed, update the state
+      if (JSON.stringify(currentVideoIds) !== JSON.stringify(newVideoIds)) {
+        setHistory(sortedHistory);
+        setLastUpdate(Date.now());
+      } else {
+        // Check individual video status changes
+        const hasStatusChange = sortedHistory.some((newVideo, index) => {
+          const currentVideo = history[index];
+          return currentVideo && 
+                 (newVideo.status !== currentVideo.status || 
+                  newVideo.url !== currentVideo.url);
+        });
+        
+        if (hasStatusChange) {
+          setHistory(sortedHistory);
+          setLastUpdate(Date.now());
+        }
+      }
+
+      // Update credits if changed
+      if (response.data.credits !== credits) {
+        setCredits(response.data.credits);
+      }
+
+    } catch (err) {
+      // Suppress error logs for polling
+      console.debug('Polling update failed:', err.message);
+    }
+  };
+
+  // 🆕 Start polling for video updates
+  const startPolling = () => {
+    // Clear existing interval
+    if (pollingInterval) {
+      clearInterval(pollingInterval);
+    }
+
+    // Start new polling interval (every 10 seconds)
+    const interval = setInterval(() => {
+      checkForVideoUpdates();
+    }, 10000); // 10 seconds
+
+    setPollingInterval(interval);
+  };
+
+  // 🆕 Stop polling
+  const stopPolling = () => {
+    if (pollingInterval) {
+      clearInterval(pollingInterval);
+      setPollingInterval(null);
+    }
+  };
+
+  // 🆕 Check if there are any pending videos that need polling
+  const hasPendingVideos = () => {
+    return history.some(video => 
+      !video.url && 
+      (video.status === 'processing' || 
+       video.status === 'generating' || 
+       video.status === 'in_progress' || 
+       video.status === 'in_queue' ||
+       video.status === 'pending')
+    );
   };
 
   useEffect(() => {
@@ -151,6 +350,35 @@ const Dashboard = ({ user }) => {
 
     fetchUserData();
   }, [user]);
+
+  // 🆕 Start/stop polling based on video status
+  useEffect(() => {
+    if (hasPendingVideos()) {
+      startPolling();
+    } else {
+      stopPolling();
+    }
+
+    // Cleanup on unmount
+    return () => {
+      stopPolling();
+    };
+  }, [history, user]);
+
+  // 🆕 Effect to restart polling when user comes back to tab
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden && hasPendingVideos()) {
+        startPolling();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [history, user]);
 
 const handleDeleteVideo = async (videoId, e) => {
   e?.stopPropagation(); 
@@ -409,6 +637,31 @@ const handleDeleteVideo = async (videoId, e) => {
       px: { xs: 2, sm: 3, md: 4 },
       color: colorScheme.textPrimary,
     }}>
+      {/* 🆕 Auto-update indicator */}
+      {hasPendingVideos() && (
+        <Box sx={{ 
+          textAlign: 'center', 
+          mb: 2,
+          animation: 'fadeInOut 2s infinite',
+          '@keyframes fadeInOut': {
+            '0%': { opacity: 0.6 },
+            '50%': { opacity: 1 },
+            '100%': { opacity: 0.6 },
+          }
+        }}>
+          <Chip
+            icon={<CircularProgress size={16} sx={{ color: 'white' }} />}
+            label="Auto-updating videos..."
+            size="small"
+            sx={{
+              background: colorScheme.warmGradient,
+              color: 'white',
+              fontWeight: 600,
+            }}
+          />
+        </Box>
+      )}
+
       <Box sx={{ mb: 4, textAlign: 'center' }}>
         <Typography
           variant="h4"
@@ -542,15 +795,20 @@ const handleDeleteVideo = async (videoId, e) => {
                 Video Gallery
               </Typography>
             </Box>
-            <Chip
-              label="Sorted by: Newest First"
-              size="small"
-              sx={{
-                background: colorScheme.coolGradient,
-                color: 'white',
-                fontWeight: 600,
-              }}
-            />
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              {hasPendingVideos() && (
+                <CircularProgress size={20} sx={{ color: colorScheme.warmPrimary }} />
+              )}
+              <Chip
+                label="Sorted by: Newest First"
+                size="small"
+                sx={{
+                  background: colorScheme.coolGradient,
+                  color: 'white',
+                  fontWeight: 600,
+                }}
+              />
+            </Box>
           </Box>
           {history.length === 0 ? (
             <Box sx={{ textAlign: 'center', py: 6 }}>
@@ -611,7 +869,7 @@ const handleDeleteVideo = async (videoId, e) => {
                       }}
                     >
                       {video.url ? (
-                        // Native <video> element
+                        // Native <video> element for completed videos
                         <video
                             src={video.url}
                             controls
@@ -624,14 +882,17 @@ const handleDeleteVideo = async (videoId, e) => {
                             Your browser does not support the video tag.
                         </video>
                       ) : (
-                        <Box sx={{ textAlign: 'center', color: colorScheme.textSecondary }}>
-                          {getStatusIcon(video.status)}
-                          <Typography variant="caption" sx={{ mt: 1, color: colorScheme.textSecondary }}>
-                            {video.status}
-                          </Typography>
-                        </Box>
+                        // 🆕 Use the new loading skeleton with progress
+                        <VideoLoadingSkeleton 
+                          status={video.status} 
+                          progress={video.progress || 
+                            (video.status === 'completed' ? 100 : 
+                             video.status === 'processing' ? 50 : 
+                             video.status === 'generating' ? 30 : 10)}
+                        />
                       )}
-                      {!video.url ? null : (
+                      
+                      {video.url && (
                         <Box sx={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
                           <Box
                             sx={{
@@ -653,7 +914,6 @@ const handleDeleteVideo = async (videoId, e) => {
                                 transform: 'translate(-50%, -50%) scale(1.1)',
                               },
                             }}
-                            // The primary action is now opening the modal on the card click
                             onClick={(e) => {
                               e.stopPropagation();
                               openVideoDialog(video);
@@ -687,23 +947,9 @@ const handleDeleteVideo = async (videoId, e) => {
                         height: '140px',
                       }}
                     >
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          fontWeight: 600,
-                          mb: 1,
-                          height: '36px',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          display: '-webkit-box',
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: 'vertical',
-                          lineHeight: 1.2,
-                          color: colorScheme.textPrimary,
-                        }}
-                      >
-                        {video.prompt}
-                      </Typography>
+                      {/* 🆕 Replace the old prompt with collapsible version */}
+                      <CollapsiblePrompt prompt={video.prompt} maxLines={2} />
+                      
                       {(video.status === 'pending' ||
                         video.status === 'generating' ||
                         video.status === 'in_progress' ||
