@@ -1,6 +1,7 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect,useCallback} from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import Cropper from 'react-easy-crop';
 import {
     Container,
     Paper,
@@ -36,7 +37,8 @@ import {
     DialogTitle,
     DialogContent,
     DialogActions,
-    InputAdornment
+    InputAdornment,
+     LinearProgress,
 } from '@mui/material';
 import {
     PlayArrow,
@@ -49,12 +51,13 @@ import {
     Mic,
     MicOff,
     AccessTime,
+ 
     AspectRatio,
     Palette,
     RocketLaunch,
     Psychology,
     Lightbulb,
-    Wallpaper,
+    Wallpaper,CloudUpload, Image as ImageIcon, Close
 } from '@mui/icons-material';
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -197,7 +200,13 @@ const VideoGenerator = ({ user }) => {
     const [selectedBackground, setSelectedBackground] = useState(BACKGROUND_OPTIONS[0]);
     const [showBackgroundPicker, setShowBackgroundPicker] = useState(false);
     const [currentGifBackground, setCurrentGifBackground] = useState(getRandomGif());
-
+    const [crop, setCrop] = useState({ x: 0, y: 0 });
+    const [zoom, setZoom] = useState(1);
+    const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
+    const [showCropper, setShowCropper] = useState(false);
+    const [imageToCrop, setImageToCrop] = useState(null); // Raw file preview
+    const [uploadedImage, setUploadedImage] = useState(null);
+    const [uploadingImage, setUploadingImage] = useState(false);
     const estimatedCost = useMemo(() => {
         return calculateVideoCost(duration, withAudio);
     }, [duration, withAudio]);
@@ -227,11 +236,88 @@ const VideoGenerator = ({ user }) => {
         }
         return 0;
     };
+    const onCropComplete = useCallback((croppedArea, croppedAreaPixels) => {
+    setCroppedAreaPixels(croppedAreaPixels);
+}, []);
+
+// NEW: Create cropped image and upload
+const createCroppedImage = async () => {
+    if (!imageToCrop || !croppedAreaPixels) return;
+
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const image = new Image();
+    image.src = URL.createObjectURL(imageToCrop);
+
+    await new Promise((resolve) => { image.onload = resolve; });
+
+    canvas.width = croppedAreaPixels.width;
+    canvas.height = croppedAreaPixels.height;
+
+    ctx.drawImage(
+        image,
+        croppedAreaPixels.x,
+        croppedAreaPixels.y,
+        croppedAreaPixels.width,
+        croppedAreaPixels.height,
+        0,
+        0,
+        croppedAreaPixels.width,
+        croppedAreaPixels.height
+    );
+
+    canvas.toBlob(async (blob) => {
+        const croppedFile = new File([blob], "starting_frame.jpg", { type: "image/jpeg" });
+        await handleImageUpload(croppedFile); // Reuse your existing upload function!
+        setShowCropper(false);
+        setImageToCrop(null);
+    }, 'image/jpeg', 0.95);
+};
 
     const handleDurationChange = (newValue) => {
         setDuration(ensureEvenNumber(newValue));
     };
 
+    const handleImageUpload = async (file) => {
+    if (!file || !file.type.startsWith('image/')) {
+        setError('Please select a valid image file');
+        return;
+    }
+
+    setUploadingImage(true);
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+        const token = await user.getIdToken();
+        const res = await axios.post(
+            `${API_URL}/api/upload/image`,
+            formData,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    // REMOVE THIS LINE COMPLETELY:
+                    // 'Content-Type': 'multipart/form-data'
+                    // → Axios + FormData auto-adds correct boundary!
+                },
+                timeout: 30000, // Optional: prevent hanging
+            }
+        );
+
+        if (res.data?.url) {
+            setUploadedImage(res.data.url);
+            setError(''); // Clear any previous errors
+        } else {
+            throw new Error('No URL returned from server');
+        }
+    } catch (err) {
+        console.error('Image upload failed:', err);
+        const msg = err.response?.data?.error || err.message || 'Upload failed. Try again.';
+        setError(msg);
+    } finally {
+        setUploadingImage(false);
+    }
+};
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!user || loading) return;
@@ -247,7 +333,8 @@ const VideoGenerator = ({ user }) => {
                     prompt, 
                     duration, 
                     withAudio,
-                    aspectRatio
+                    aspectRatio,
+                    imageUrl: uploadedImage
                 }, 
                 {
                     headers: {
@@ -541,7 +628,104 @@ const VideoGenerator = ({ user }) => {
                                         </Tooltip>
                                     </Box>
                                 </Box>
+                                                <Grid item xs={12}>
+    <Card sx={{ p: 2, ...glassmorphismStyle, position: 'relative', overflow: 'hidden' }}>
+        <Typography variant="subtitle2" sx={{ mb: 2, display: 'flex', alignItems: 'center', color: colorScheme.textPrimary }}>
+            <ImageIcon sx={{ mr: 1, color: colorScheme.warmPrimary }} />
+            Starting Image • Bofya ili kuchagua sehemu unayopenda (VEO 3.1)
+        </Typography>
 
+        {/* UPLOADED + FINAL PREVIEW */}
+        {uploadedImage && !showCropper && (
+            <Box sx={{ position: 'relative' }}>
+                <img src={uploadedImage} alt="Final frame" style={{ width: '100%', borderRadius: 12, border: `3px solid ${colorScheme.coolPrimary}` }} />
+                <Chip
+                    label="VEO 3.1 • Tayari!"
+                    sx={{ position: 'absolute', top: 10, right: 10, background: colorScheme.coolGradient, color: 'white', fontWeight: 700 }}
+                />
+                <IconButton onClick={() => { setUploadedImage(null); setImageToCrop(null); }} sx={{ position: 'absolute', top: 10, left: 10, background: 'rgba(0,0,0,0.7)', color: 'white' }}>
+                    <Close />
+                </IconButton>
+            </Box>
+        )}
+
+        {/* CROPPER MODE */}
+        {showCropper && (
+            <Box sx={{ height: 400, position: 'relative', background: '#000', borderRadius: 3, overflow: 'hidden' }}>
+                <Cropper
+                    image={URL.createObjectURL(imageToCrop)}
+                    crop={crop}
+                    zoom={zoom}
+                    aspect={16 / 9} // Matches your default aspect ratio
+                    onCropChange={setCrop}
+                    onZoomChange={setZoom}
+                    onCropComplete={onCropComplete}
+                    style={{ containerStyle: { borderRadius: 12 } }}
+                />
+                <Box sx={{ position: 'absolute', bottom: 0, left: 0, right: 0, p: 2, background: 'linear-gradient(transparent, black)', color: 'white' }}>
+                    <Typography variant="body2" sx={{ mb: 1 }}>Zoom & Move • Chagua sehemu bora</Typography>
+                    <Slider value={zoom} min={1} max={3} step={0.1} onChange={(_, z) => setZoom(z)} sx={{ color: colorScheme.warmPrimary }} />
+                    <Box sx={{ display: 'flex', gap: 1, mt: 2 }}>
+                        <Button onClick={() => { setShowCropper(false); setImageToCrop(null); }} sx={{ flex: 1, background: '#333', color: 'white' }}>
+                            Ghairi
+                        </Button>
+                        <Button onClick={createCroppedImage} variant="contained" sx={{ flex: 2, ...warmGradientStyle }}>
+                            Tumia Sehemu Hii
+                        </Button>
+                    </Box>
+                </Box>
+            </Box>
+        )}
+
+        {/* INITIAL UPLOAD STATE */}
+        {!uploadedImage && !showCropper && (
+            <Box
+                sx={{
+                    border: '3px dashed rgba(255,255,255,0.3)',
+                    borderRadius: 3,
+                    p: 6,
+                    textAlign: 'center',
+                    cursor: 'pointer',
+                    transition: 'all 0.4s ease',
+                    '&:hover': { borderColor: colorScheme.coolPrimary, background: alpha(colorScheme.coolPrimary, 0.08) }
+                }}
+                onClick={() => document.getElementById('image-upload').click()}
+                onDrop={(e) => {
+                    e.preventDefault();
+                    const file = e.dataTransfer.files[0];
+                    if (file?.type.startsWith('image/')) {
+                        setImageToCrop(file);
+                        setShowCropper(true);
+                    }
+                }}
+                onDragOver={(e) => e.preventDefault()}
+            >
+                <CloudUpload sx={{ fontSize: 64, color: colorScheme.textSecondary, mb: 2 }} />
+                <Typography variant="h6" sx={{ color: colorScheme.textPrimary, fontWeight: 600 }}>
+                    Bofya au Buruta Picha Hapa
+                </Typography>
+                <Typography variant="body2" sx={{ color: colorScheme.textSecondary, mt: 1 }}>
+                    Chagua sehemu unayopenda • Matokeo bora zaidi na VEO 3.1
+                </Typography>
+                <input
+                    id="image-upload"
+                    type="file"
+                    accept="image/*"
+                    hidden
+                    onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                            setImageToCrop(file);
+                            setShowCropper(true);
+                        }
+                    }}
+                />
+            </Box>
+        )}
+
+        {uploadingImage && <LinearProgress sx={{ mt: 2, borderRadius: 2 }} color="secondary" />}
+    </Card>
+</Grid>
                                 <form onSubmit={handleSubmit}>
                                     <TextField
                                         fullWidth
