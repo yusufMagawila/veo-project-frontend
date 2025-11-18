@@ -32,12 +32,58 @@ import {
   Fullscreen,
   PlayArrow,
   Delete,
+  AccessTime
 } from '@mui/icons-material';
 
 // FIX: Reverting to import.meta.env for Vite projects as requested by the user.
 // Using VITE_API_URL if available, otherwise defaulting to '/api'.
 const API_URL = import.meta.env.VITE_API_URL || '/api'; 
 
+const parseVideoTimestamp = (timestamp) => {
+  if (!timestamp) return new Date();
+
+  // Case 1: Real Firestore Timestamp (has toDate method)
+  if (timestamp.toDate && typeof timestamp.toDate === 'function') {
+    return timestamp.toDate();
+  }
+
+  // Case 2: Firestore format with _seconds + _nanoseconds (from JSON)
+  if (timestamp._seconds !== undefined) {
+    return new Date(timestamp._seconds * 1000 + Math.floor(timestamp._nanoseconds / 1000000));
+  }
+
+  // Case 3: Regular timestamp object with seconds
+  if (timestamp.seconds !== undefined) {
+    return new Date(timestamp.seconds * 1000);
+  }
+
+  // Case 4: ISO string or anything else
+  const parsed = new Date(timestamp);
+  return isNaN(parsed.getTime()) ? new Date() : parsed;
+};
+
+// HUMAN READABLE FORMAT (e.g. "2h ago", "3d ago", "17 Nov 2025")
+const formatDate = (timestamp) => {
+  const date = parseVideoTimestamp(timestamp);
+  const now = new Date();
+  const diffMs = now - date;
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 1) return 'Just now';
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays < 7) return `${diffDays}d ago`;
+
+  return date.toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined,
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+};
 // 🆕 Video Loading Skeleton Component with Progress
 const VideoLoadingSkeleton = ({ status, progress }) => {
   const theme = useTheme();
@@ -1029,13 +1075,10 @@ const handleDeleteVideo = async (videoId, e) => {
                               color: colorScheme.textSecondary,
                             }}
                           >
-                            {new Date(video.timestamp.toDate ? video.timestamp.toDate() : video.timestamp).toLocaleDateString('en-US', {
-                              year: 'numeric',
-                              month: 'short',
-                              day: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit',
-                            })}
+                          <Typography variant="caption" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, opacity: 0.8 }}>
+  <AccessTime fontSize="small" />
+  {formatDate(video.timestamp)}
+</Typography>
                           </Typography>
                         )}
                       </Box>
