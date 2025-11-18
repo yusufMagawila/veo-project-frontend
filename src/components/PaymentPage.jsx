@@ -39,7 +39,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 const CREDIT_PACKAGES = {
   'starter': { 
     credits: 1000, 
-    amount: 25000,  
+    amount: 30000,
     label: 'Starter Pack',
     description: 'Perfect for trying out the platform',
     popular: false,
